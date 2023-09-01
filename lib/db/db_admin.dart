@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:logger/logger.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:semana9_taskdb/models/task_model.dart';
 import 'package:sqflite/sqflite.dart';
 
 var logger = Logger();
@@ -42,19 +43,23 @@ class DBAdmin {
     int res = await db!.rawInsert(
         "INSERT INTO TASK(title, description, status) VALUES('Tarea 1', 'Descripcion 1', 'Pendiente')");
     logger.t(res);
+    return res;
   }
 
-  insertTask(Map<String, dynamic> task) async {
+  Future<int> insertTask(TaskModel task) async {
     Database? db = await checkDatabase();
-    int res = await db!.insert('TASK', task);
+    int res = await db!.insert('TASK', task.toJson());
     logger.t(res);
+    return res;
   }
 
-  Future<List<Map<String, dynamic>>> getTasks() async {
+  Future<List<TaskModel>> getTasks() async {
     Database? db = await checkDatabase();
     final List<Map<String, dynamic>> tasks = await db!.query('TASK');
-    logger.t(tasks);
-    return tasks;
+    List<TaskModel> taskList = tasks.isNotEmpty
+        ? tasks.map((task) => TaskModel.fromJson(task)).toList()
+        : [];
+    return taskList;
   }
 
   Future<List<Map<String, dynamic>>> getRawTasks() async {
@@ -73,10 +78,17 @@ class DBAdmin {
     return task;
   }
 
-  Future<int> updateTask(Map<String, dynamic> task) async {
+  Future<int> updateTask(TaskModel task) async {
     Database? db = await checkDatabase();
-    final int res = await db!
-        .update('TASK', task, where: 'id = ?', whereArgs: [task['id']]);
+    final int res = await db!.update(
+        'TASK',
+        {
+          'title': task.title,
+          'description': task.description,
+          'status': task.status
+        },
+        where: 'id = ?',
+        whereArgs: [task.id]);
     logger.t(res);
     return res;
   }
