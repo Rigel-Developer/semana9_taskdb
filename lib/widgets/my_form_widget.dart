@@ -13,7 +13,7 @@ class MyFormWidget extends StatefulWidget {
 class _MyFormWidgetState extends State<MyFormWidget> {
   late TextEditingController titleController;
   late TextEditingController descriptionController;
-  late String dropdownValue = 'Pendiente';
+  late String dropdownValue;
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -25,6 +25,10 @@ class _MyFormWidgetState extends State<MyFormWidget> {
       descriptionController =
           TextEditingController(text: widget.task!.description);
       dropdownValue = widget.task!.status;
+    } else {
+      titleController = TextEditingController();
+      descriptionController = TextEditingController();
+      dropdownValue = 'Pendiente';
     }
   }
 
